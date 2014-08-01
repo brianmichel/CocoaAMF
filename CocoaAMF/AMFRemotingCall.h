@@ -31,19 +31,27 @@
 	NSError *m_error;
 	NSObject <AMFRemotingCallDelegate> *m_delegate;
 	NSMutableDictionary *m_amfHeaders;
+    
+    NSString * m_user;
+    NSString * m_password;
 }
 
 @property (nonatomic, retain) NSURL *URL;
 @property (nonatomic, retain) NSString *service;
 @property (nonatomic, retain) NSString *method;
 @property (nonatomic, retain) NSObject *arguments;
+@property (nonatomic, retain) NSString *user;
+@property (nonatomic, retain) NSString *password;
 @property (nonatomic, assign) NSObject <AMFRemotingCallDelegate> *delegate;
 @property (nonatomic, assign) AMFVersion amfVersion; // AMF3 is used by default
+@property (nonatomic, assign) BOOL m_isLoading;
 
 + (AMFRemotingCall *)remotingCallWithURL:(NSURL *)url service:(NSString *)service 
 	method:(NSString *)method arguments:(NSObject *)arguments;
 - (id)initWithURL:(NSURL *)url service:(NSString *)service method:(NSString *)method 
 	arguments:(NSObject *)arguments;
+- (id)initWithURL:(NSURL *)url service:(NSString *)service method:(NSString *)method 
+        arguments:(NSObject *)arguments user:(NSString *)user password:(NSString *)password;
 
 - (void)start; // starts the request
 
@@ -62,6 +70,7 @@
 - (void)remotingCall:(AMFRemotingCall *)remotingCall didReceiveData:(NSData *)data;
 - (NSURLRequest *)remotingCall:(AMFRemotingCall *)remotingCall 
 	willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse;
+- (void)remotingCall:(AMFRemotingCall *)remotingCall didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite;
 
 @required
 - (void)remotingCallDidFinishLoading:(AMFRemotingCall *)remotingCall 

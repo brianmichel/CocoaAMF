@@ -21,7 +21,8 @@
 @property (nonatomic, retain) NSMutableDictionary *properties;
 @property (nonatomic, retain) NSMutableArray *data;
 
-+ (ASObject *)asObjectWithDictionary:(NSDictionary *)dict;
+- (ASObject *)initWithDictionary:(NSMutableDictionary *)dict;
++ (ASObject *)asObjectWithDictionary:(NSMutableDictionary *)dict;
 - (void)addObject:(id)obj;
 - (NSUInteger)count;
 

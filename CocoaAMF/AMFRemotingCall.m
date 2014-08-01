@@ -7,6 +7,7 @@
 //
 
 #import "AMFRemotingCall.h"
+#import "NSData+Base64.h"
 
 @interface AMFRemotingCall (Private)
 - (NSString *)_nextResponseURI;
@@ -17,7 +18,7 @@
 @implementation AMFRemotingCall
 
 @synthesize service=m_service, method=m_method, arguments=m_arguments, amfVersion=m_amfVersion, 
-	delegate=m_delegate;
+	delegate=m_delegate, m_isLoading, user=m_user, password=m_password;
 
 static uint32_t g_responseCount = 1;
 
@@ -45,7 +46,7 @@ static uint32_t g_responseCount = 1;
 }
 
 - (id)initWithURL:(NSURL *)url service:(NSString *)service method:(NSString *)method 
-	arguments:(NSObject *)arguments
+        arguments:(NSObject *)arguments
 {
 	if (self = [self init])
 	{
@@ -53,6 +54,17 @@ static uint32_t g_responseCount = 1;
 		self.service = service;
 		self.method = method;
 		self.arguments = arguments;
+	}
+	return self;
+}
+
+- (id)initWithURL:(NSURL *)url service:(NSString *)service method:(NSString *)method 
+        arguments:(NSObject *)arguments user:(NSString *)user password:(NSString *)password 
+{
+    if (self = [self initWithURL:url service:service method:method arguments:arguments])
+	{
+		self.user = user;
+		self.password = password;
 	}
 	return self;
 }
@@ -72,6 +84,8 @@ static uint32_t g_responseCount = 1;
 	[m_service release];
 	[m_method release];
 	[m_arguments release];
+    [m_user release];
+    [m_password release];
 	[m_error release];
 	[m_amfHeaders release];
 	[super dealloc];
@@ -98,13 +112,36 @@ static uint32_t g_responseCount = 1;
 	if (m_amfHeaders != nil)
 		message.headers = [m_amfHeaders allValues];
 	
-	[m_request setHTTPBody:[message data]];
+    if (m_user && m_password) {
+        NSURLCredential *credential = [NSURLCredential credentialWithUser:m_user
+                                                                 password:m_password
+                                                              persistence:NSURLCredentialPersistenceForSession];
+        
+        NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc]
+                                                 initWithHost:[[m_request URL] host]
+                                                 port:0
+                                                 protocol:@"http"
+                                                 realm:nil
+                                                 authenticationMethod:nil];
+        
+        
+        [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential
+                                                            forProtectionSpace:protectionSpace];
+        [protectionSpace release];
+        
+        /*NSData *authData = [[NSString stringWithFormat:@"%@:%@", m_user, m_password] dataUsingEncoding:NSASCIIStringEncoding];
+        NSString *authValue = [NSString stringWithFormat:@"Basic %@", [authData base64EncodingWithLineLength:0]];
+        [m_request setValue:authValue forHTTPHeaderField:@"Authorization"];
+         */
+    }
+    
+    [m_request setHTTPBody:[message data]];
+    //NSLog(@"message %@ %@", m_request, message);
 	[message release];
-	
+
 	m_error = nil;
 	m_receivedData = [[NSMutableData alloc] init];
 	m_connection = [[NSURLConnection alloc] initWithRequest:m_request delegate:self];
-	
 	m_isLoading = YES;
 }
 
@@ -142,8 +179,6 @@ static uint32_t g_responseCount = 1;
 		mustUnderstand:mustUnderstand] forKey:field];
 }
 
-
-
 #pragma mark -
 #pragma mark Private methods
 
@@ -169,6 +204,8 @@ static uint32_t g_responseCount = 1;
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {	
+	//NSLog(@" %@", [(NSHTTPURLResponse *)response allHeaderFields]);
+	
 	if ([[[(NSHTTPURLResponse *)response allHeaderFields] objectForKey:@"Content-Type"] 
 		rangeOfString:@"application/x-amf"].location == NSNotFound)
 	{
@@ -192,6 +229,15 @@ static uint32_t g_responseCount = 1;
 		objc_msgSend(m_delegate, @selector(remotingCall:didReceiveResponse:), self, response);
 	}
 }
+
+- (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
+    
+    if ([m_delegate respondsToSelector:@selector(remotingCall:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
+    {
+        objc_msgSend(m_delegate, @selector(remotingCall:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:), self, bytesWritten, totalBytesWritten, totalBytesExpectedToWrite);
+    }
+}
+
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
@@ -229,6 +275,7 @@ static uint32_t g_responseCount = 1;
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
+	NSLog(@"AMF fail with error");
 	objc_msgSend(m_delegate, @selector(remotingCall:didFailWithError:), self, error);
 	[self _cleanup];
 	m_isLoading = NO;
@@ -237,6 +284,8 @@ static uint32_t g_responseCount = 1;
 - (NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request 
 	redirectResponse:(NSURLResponse *)redirectResponse
 {
+	//NSLog(@"AMF >>> %@:%@", self.service, self.method);
+
 	if ([m_delegate respondsToSelector:@selector(remotingCall:willSendRequest:redirectResponse:)])
 	{
 		return (NSURLRequest *)objc_msgSend(m_delegate, 

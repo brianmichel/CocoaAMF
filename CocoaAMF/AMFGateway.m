@@ -256,7 +256,7 @@
 {
 	NSObject *service = [self _serviceForName:serviceName];
 	// service not found
-	if (service == nil)
+	if (!service)
 	{
 		*error = [NSError errorWithDomain:kAMFGatewayErrorDomain code:kAMFErrorServiceNotFound 
 			userInfo:[NSDictionary dictionaryWithObjectsAndKeys:

@@ -29,6 +29,7 @@
 }
 @property (nonatomic, readonly) AMFVersion objectEncoding;
 @property (nonatomic, readonly) NSData *data;
+@property (nonatomic, readonly) uint32_t position;
 
 //--------------------------------------------------------------------------------------------------
 //	Usual NSCoder methods

@@ -762,8 +762,7 @@ not allow externalizable objects (non-keyed archiving)!"];
 	// PyAMF does always write 0 instead of length
 	// @TODO look how flash handles this
 	[self encodeUnsignedInt:0];
-	for (NSString *key in value)
-	{
+	for (NSString *key in value)	{
 		[self _encodeString:key omitType:YES];
 		[self encodeObject:[value objectForKey:key]];
 	}
@@ -801,7 +800,7 @@ not allow externalizable objects (non-keyed archiving)!"];
 
 - (void)_encodeNumber:(NSNumber *)value
 {
-	if ([[value className] isEqualToString:@"NSCFBoolean"])
+    if ([[value className] rangeOfString:@"NSCFBoolean"].location != NSNotFound)
 	{
 		[self encodeUnsignedChar:kAMF0BooleanType];
 		[self encodeBool:[value boolValue]];
@@ -825,7 +824,7 @@ not allow externalizable objects (non-keyed archiving)!"];
 
 @end
 
-
+#pragma mart - AMF3Archiver
 
 @implementation AMF3Archiver
 
@@ -991,7 +990,7 @@ not allow externalizable objects (non-keyed archiving)!"];
 
 - (void)_encodeNumber:(NSNumber *)value
 {
-	if ([[value className] isEqualToString:@"NSCFBoolean"])
+    if ([[value className] rangeOfString:@"NSCFBoolean"].location != NSNotFound)
 	{
 		[self encodeUnsignedChar:([value boolValue] ? kAMF3TrueType : kAMF3FalseType)];
 		return;

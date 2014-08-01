@@ -50,7 +50,7 @@
 static NSMutableDictionary *g_registeredClasses = nil;
 static BOOL g_defaultClassesRegistered = NO;
 static uint16_t g_options = 0;
-@synthesize objectEncoding=m_objectEncoding, data=m_data;
+@synthesize objectEncoding=m_objectEncoding, data=m_data, position= m_position;
 
 #pragma mark -
 #pragma mark Initialization & Deallocation

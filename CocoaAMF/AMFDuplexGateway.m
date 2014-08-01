@@ -309,7 +309,7 @@
 		if (error != nil)
 		{
 			// @TODO handle error
-			NSLog(@"%@", error);
+			NSLog(@"Duplex gateway error  %@", error);
 		}
 			
 		AMFActionMessage *ram = [[AMFActionMessage alloc] init];
@@ -381,7 +381,7 @@
 		}
 		@catch (NSException *e) 
 		{
-			NSLog(@"%@", e);
+			NSLog(@"Exception duplex getway %@", e);
 		}
 		@finally 
 		{
