@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
                        
                        Action Message Format (AMF) is a binary format used to serialize object graphs such as ActionScript objects and XML, or send messages between an Adobe Flash client and a remote service, usually a Flash Media Server or third party alternatives. This library provides classes for encoding and decoding from the AMF format.
                        DESC
-  s.screenshots 	 = "https://github.com/jold/CocoaAMF/benchmark.png"
+  s.screenshots 	 = "https://raw.githubusercontent.com/jold/CocoaAMF/" + s.version.to_s + "/benchmark.png"
   s.homepage         = "https://github.com/jold/CocoaAMF"
   s.authors  		 = 'Daniel Jankovic', { 'Marc Bauer' => 'mb@nesium.com' }
   s.source           = { :git => "https://github.com/jold/CocoaAMF.git", :tag => s.version.to_s }
