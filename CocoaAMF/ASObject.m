@@ -16,10 +16,8 @@
 #pragma mark -
 #pragma mark Initialization & Deallocation
 
-- (id)init
-{
-	if (self = [super init])
-	{
+- (id)init {
+	if ((self = [super init])) {
 		m_properties = nil;
 		m_data = nil;
 		m_type = nil;
@@ -28,12 +26,16 @@
 	return self;
 }
 
-+ (ASObject *)asObjectWithDictionary:(NSDictionary *)dict
-{
+- (ASObject *)initWithDictionary:(NSMutableDictionary *)dict {
+    if ((self = [super init])) {
+        m_properties = [dict copy];
+    }
+	return self;
+}
+
++ (ASObject *)asObjectWithDictionary:(NSMutableDictionary *)dict {
 	ASObject *obj = [[[ASObject alloc] init] autorelease];
-	NSMutableDictionary *mutableCopy = [dict mutableCopy];
-	obj.properties = mutableCopy;
-	[mutableCopy release];
+	obj.properties = dict;
 	return obj;
 }
 
@@ -58,8 +60,6 @@
 			? [asObj.data isEqual:m_data] 
 			: [asObj.properties isEqual:m_properties]);
 }
-
-
 
 #pragma mark -
 #pragma mark Public methods
